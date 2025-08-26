@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "TradeSystem\\TradeSystem.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "TradeSystemAPIApp\\TradeSystemAPIApp.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

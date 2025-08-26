@@ -1,0 +1,24 @@
+﻿@{
+    ViewData["Title"] = "Generate Compliance Report";
+    var availableLcIds = ViewBag.AvailableLcIds as List<int>;
+}
+
+<h2>Generate Compliance Report</h2>
+
+<form asp-action="Run" method="post">
+    <div class="form-group">
+        <label for="lcId">Select Letter of Credit</label>
+        <select id="lcId" name="lcId" class="form-control" required>
+            <option value="">-- Select --</option>
+            @if (availableLcIds != null)
+            {
+                foreach (var id in availableLcIds)
+                {
+                    <option value="@id">@id</option>
+                }
+            }
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-3">Generate</button>
+</form>

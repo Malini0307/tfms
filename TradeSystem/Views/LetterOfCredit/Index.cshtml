@@ -1,0 +1,47 @@
+﻿@model IEnumerable<TradeSystem.Models.LetterOfCredit>
+
+<h2>Letter of Credit List</h2>
+<p>
+    @if (User.IsInRole("User"))
+    {
+        <a class="btn btn-primary" href="@Url.Action("Create")">Create New</a>
+    }
+</p>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Applicant</th>
+            <th>Beneficiary</th>
+            <th>Amount</th>
+            <th>Currency</th>
+            <th>Expiry Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.ApplicantName</td>
+                <td>@item.BeneficiaryName</td>
+                <td>@item.Amount</td>
+                <td>@item.Currency</td>
+                <td>@item.ExpiryDate.ToShortDateString()</td>
+                <td>@item.Status</td>
+                <td class="d-flex gap-2">
+                    <a class="btn btn-info" href="@Url.Action("Details", new { id = item.LcId })">Details</a>
+                    @if (User.IsInRole("User") && item.Status != TradeSystem.Models.LCStatus.Closed)
+                    {
+                        <a class="btn btn-warning" href="@Url.Action("Amend", new { id = item.LcId })">Amend</a>
+                    }
+                    @if (User.IsInRole("Admin") && item.Status != TradeSystem.Models.LCStatus.Closed)
+                    {
+                        <a class="btn btn-danger" href="@Url.Action("Close", new { id = item.LcId })">Close</a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

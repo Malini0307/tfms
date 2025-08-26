@@ -1,0 +1,32 @@
+﻿@model TradeSystem.Models.LetterOfCredit
+
+<h2>Create Letter of Credit</h2>
+<form asp-action="Create" method="post" class="card p-3">
+    <div class="mb-3">
+        <label class="form-label">Applicant Name</label>
+        <input asp-for="ApplicantName" class="form-control" />
+        <span class="text-danger" asp-validation-for="ApplicantName"></span>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Beneficiary Name</label>
+        <input asp-for="BeneficiaryName" class="form-control" />
+        <span class="text-danger" asp-validation-for="BeneficiaryName"></span>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Amount</label>
+        <input asp-for="Amount" class="form-control" />
+        <span class="text-danger" asp-validation-for="Amount"></span>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Currency</label>
+        <input asp-for="Currency" class="form-control" />
+        <span class="text-danger" asp-validation-for="Currency"></span>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Expiry Date</label>
+        <input asp-for="ExpiryDate" type="date" class="form-control" />
+        <span class="text-danger" asp-validation-for="ExpiryDate"></span>
+    </div>
+    @Html.AntiForgeryToken()
+    <button class="btn btn-primary" type="submit">Create</button>
+</form>

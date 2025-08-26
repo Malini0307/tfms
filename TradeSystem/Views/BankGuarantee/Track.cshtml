@@ -1,0 +1,31 @@
+﻿@model TradeSystem.Models.BankGuarantee
+
+<h2>Track Bank Guarantee</h2>
+<dl class="row">
+    <dt class="col-sm-2">LC Reference</dt>
+    <dd class="col-sm-10">
+        @if (Model.LetterOfCredit != null)
+        {
+            <a href="@Url.Action("Details", "LetterOfCredit", new { id = Model.LcId })">LC #@Model.LcId</a>
+        }
+        else
+        {
+
+            <span class="text-muted">N/A</span>
+        }
+    </dd>
+
+    <dt class="col-sm-2">Applicant</dt>
+    <dd class="col-sm-10">@Model.ApplicantName</dd>
+    <dt class="col-sm-2">Beneficiary</dt>
+    <dd class="col-sm-10">@Model.BeneficiaryName</dd>
+    <dt class="col-sm-2">Amount</dt>
+    <dd class="col-sm-10">@Model.GuaranteeAmount</dd>
+    <dt class="col-sm-2">Currency</dt>
+    <dd class="col-sm-10">@Model.Currency</dd>
+    <dt class="col-sm-2">Validity</dt>
+    <dd class="col-sm-10">@Model.ValidityPeriod.ToShortDateString()</dd>
+    <dt class="col-sm-2">Status</dt>
+    <dd class="col-sm-10">@Model.Status</dd>
+</dl>
+<a asp-action="Index" class="btn btn-secondary">Back</a>

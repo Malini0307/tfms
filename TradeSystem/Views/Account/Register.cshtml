@@ -1,0 +1,50 @@
+﻿@{
+    ViewData["Title"] = "Register";
+    var role = (string?)ViewBag.Role ?? "";
+}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Register @if(!string.IsNullOrEmpty(role)){
+    <text>as <strong>@role</strong></text>
+        }
+</h2>
+
+    <form method="post" class="w-50 mx-auto card p-4 shadow-sm border-0">
+        <input type="hidden" name="role" value="@role" />
+        <div class="mb-3">
+            <label class="form-label">Full Name</label>
+            <input name="fullName" class="form-control" required />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input name="email" type="email" class="form-control" required />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Password</label>
+            <input type="password" name="password" class="form-control" required />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Confirm Password</label>
+            <input type="password" name="confirmPassword" class="form-control" required />
+        </div>
+        @if (string.IsNullOrEmpty(role))
+        {
+            <div class="mb-3">
+                <label class="form-label">Role</label>
+                <select name="role" class="form-select" required>
+                    <option value="">Select role</option>
+                    <option value="Admin">Admin</option>
+                    <option value="User">User</option>
+                </select>
+            </div>
+        }
+        @Html.AntiForgeryToken()
+        @if (ViewBag.Error != null)
+        {
+            <div class="alert alert-danger">@Html.Raw(ViewBag.Error)</div>
+        }
+        <button type="submit" class="btn w-100" style="background-color: #6610f2; color: white;">Register</button>
+        <div class="text-center mt-3">
+            <a href="/Account/Login?role=@role" class="text-decoration-none">Already have an account? Login</a>
+        </div>
+    </form>
+</div>

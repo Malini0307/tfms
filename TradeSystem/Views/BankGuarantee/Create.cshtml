@@ -1,0 +1,44 @@
+﻿@using Microsoft.AspNetCore.Mvc.Rendering
+@{
+    ViewData["Title"] = "Request Bank Guarantee (From LC)";
+    var lcList = ViewBag.LCs as List<SelectListItem>;
+    var preselectedLcId = Context.Request.Query["lcId"].ToString();
+}
+
+<h2>Request Bank Guarantee (From Letter of Credit)</h2>
+
+<form asp-action="Create" method="post" class="card p-3">
+    <div class="mb-3">
+        <label class="form-label">Select Letter of Credit</label>
+        <select name="lcId" class="form-select" required>
+            <option value="">-- Select LC --</option>
+            @if (lcList != null)
+            {
+                foreach (var it in lcList)
+                {
+                    if (preselectedLcId == it.Value)
+                    {
+                        <option value="@it.Value" selected>@it.Text</option>
+                    }
+                    else
+                    {
+                        <option value="@it.Value">@it.Text</option>
+                    }
+                }
+            }
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Custom Guarantee Amount (optional)</label>
+        <input name="customAmount" type="number" step="0.01" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Validity Period</label>
+        <input name="validityPeriod" type="date" class="form-control" required />
+    </div>
+
+    @Html.AntiForgeryToken()
+    <button type="submit" class="btn btn-primary">Submit Request</button>
+</form>

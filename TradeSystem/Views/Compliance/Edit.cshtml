@@ -1,0 +1,41 @@
+﻿@model TradeSystem.Models.Compliance
+@{
+    ViewData["Title"] = "Edit Compliance Report";
+}
+
+<div class="container mt-4">
+    <h2>Edit Compliance Report</h2>
+
+    <form asp-action="Edit" method="post" class="card p-3">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <input type="hidden" asp-for="ComplianceId" />
+
+        <div class="mb-3">
+            <label class="form-label">Transaction Reference</label>
+            <input asp-for="TransactionReference" class="form-control" readonly />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Compliance Status</label>
+            <select asp-for="ComplianceStatus" class="form-select"
+                    asp-items="Html.GetEnumSelectList<TradeSystem.Models.Status4>()"></select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Remarks</label>
+            <input asp-for="Remarks" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Report Date</label>
+            <input asp-for="ReportDate" class="form-control" readonly />
+        </div>
+
+        <div class="d-flex justify-content-between">
+            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+    </form>
+</div>

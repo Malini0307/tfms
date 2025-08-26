@@ -1,0 +1,72 @@
+﻿@{
+    ViewData["Title"] = "Contact";
+}
+<div class="container my-5">
+    <h2 class="mb-4">Contact Us</h2>
+    <p class="lead mb-4">Get in touch with our Trade Finance Management System team. We're here to help with Letters of Credit, Bank Guarantees, and all your trade finance needs.</p>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-primary">General Support</h5>
+                    <p class="card-text">For general inquiries and system support:</p>
+                    <ul class="list-unstyled">
+                        <li><i class="bi bi-envelope me-2"></i><a href="mailto:support@tfms.local">support@tfms.local</a></li>
+                        <li><i class="bi bi-telephone me-2"></i><a href="tel:+10001234567">+1 (000) 123-4567</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-primary">Business Hours</h5>
+                    <p class="card-text">Our support team is available:</p>
+                    <ul class="list-unstyled">
+                        <li><strong>Monday - Friday:</strong> 8:00 AM - 6:00 PM (EST)</li>
+                        <li><strong>Weekends:</strong> Emergency support only</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-primary">Specialized Support</h5>
+                    <p class="card-text">For specific trade finance operations:</p>
+                    <ul class="list-unstyled">
+                        <li><strong>Letters of Credit:</strong> <a href="mailto:lc@tfms.local">lc@tfms.local</a></li>
+                        <li><strong>Bank Guarantees:</strong> <a href="mailto:bg@tfms.local">bg@tfms.local</a></li>
+                        <li><strong>Compliance:</strong> <a href="mailto:compliance@tfms.local">compliance@tfms.local</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-primary">Office Address</h5>
+                    <p class="card-text">Trade Finance Management System</p>
+                    <address class="mb-0">
+                        100 Finance Way, Suite 500<br>
+                        Metropolis, NY 10001<br>
+                        United States
+                    </address>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="alert alert-info mt-4" role="alert">
+        <i class="bi bi-info-circle me-2"></i>
+        <strong>Need Help?</strong> If you're experiencing login issues or need role changes, please contact your system administrator or email us at <a href="mailto:support@tfms.local">support@tfms.local</a>.
+    </div>
+</div>
+
+@section Footer {
+    @await Html.PartialAsync("_Footer")
+}

@@ -1,0 +1,39 @@
+﻿@inject Microsoft.AspNetCore.Identity.UserManager<TradeSystem.Models.ApplicationUser> UserManager
+<header>
+    <nav class="navbar navbar-expand-lg navbar-dark shadow-sm" style="background-color: #6610f2;">
+        <div class="container">
+            <a class="navbar-brand fw-semibold" href="/">Trade Finance Management System</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topnav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse justify-content-end" id="topnav">
+                <ul class="navbar-nav align-items-lg-center">
+                    <li class="nav-item"><a class="nav-link fw-semibold" href="#">Home</a></li>
+                    <li class="nav-item"><a class="nav-link fw-semibold" href="/Home/Contact">Contact</a></li>
+                    @* @if (User.Identity?.IsAuthenticated ?? false)
+                    {
+                        if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item"><a class="nav-link" href="/AdminDashboard/Index">Admin Dashboard</a></li>
+                        }
+                        else if (User.IsInRole("User"))
+                        {
+                            <li class="nav-item"><a class="nav-link" href="/UserDashboard/Index">User Dashboard</a></li>
+                        } *@
+                    @* var currentUser = await UserManager.GetUserAsync(User);
+                        var displayName = (currentUser != null && !string.IsNullOrWhiteSpace(currentUser.FullName)) ? currentUser.FullName : (User.Identity?.Name ?? "");
+                        <li class="nav-item">
+                            <span class="navbar-text ms-3 text-white"><strong>@displayName</strong></span>
+                        </li>
+                        <li class="nav-item"><a class="nav-link" asp-action="Index" asp-controller="Home">Logout</a></li> *@
+                    @* } *@
+                    @* else
+                    {
+                        <li class="nav-item"><a class="nav-link" href="/Account/Login">Login</a></li>
+                    } *@
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>

@@ -1,0 +1,41 @@
+﻿@model TradeSystem.Models.Compliance
+@using TradeSystem.Models
+@{
+    ViewData["Title"] = "Compliance Details";
+}
+<div class="container mt-4">
+    <h2>Compliance Details</h2>
+    <div class="mb-2"><strong>ID:</strong> @Model.ComplianceId</div>
+    <div class="mb-2"><strong>Reference:</strong> @Model.TransactionReference</div>
+    <div class="mb-2"><strong>Status:</strong> @Model.ComplianceStatus</div>
+    <div class="mb-2"><strong>Remarks:</strong> @Model.Remarks</div>
+    <div class="mb-2"><strong>Date:</strong> @Model.ReportDate.ToString("yyyy-MM-dd HH:mm")</div>
+    <div class="mb-2"><strong>Risk Score:</strong> @(Model.OverallRiskScore?.ToString("0.##") ?? "-")%</div>
+
+    <div class="mb-3">
+        <a href="@Model.PdfPath" target="_blank" class="btn btn-success">Download PDF</a>
+        <a asp-action="Index" class="btn btn-secondary">Back</a>
+    </div>
+
+    @if (User.IsInRole("Admin"))
+    {
+        <hr />
+        <h4>Edit & Submit Report</h4>
+        <form method="post" asp-action="Submit" class="card p-3">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="ComplianceId" value="@Model.ComplianceId" />
+            <div class="mb-3">
+                <label class="form-label">Status</label>
+                <select name="ComplianceStatus" class="form-select">
+                    <option value="Compliant" selected="@(Model.ComplianceStatus == Status4.Compliant)">Compliant</option>
+                    <option value="Non_Compliant" selected="@(Model.ComplianceStatus == Status4.Non_Compliant)">Non-Compliant</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Remarks</label>
+                <input type="text" name="Remarks" value="@Model.Remarks" class="form-control" />
+            </div>
+            <button type="submit" class="btn btn-primary">Submit Report</button>
+        </form>
+    }
+</div>

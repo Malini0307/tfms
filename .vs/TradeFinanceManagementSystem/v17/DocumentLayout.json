@@ -1,0 +1,109 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\2420924\\source\\repos\\TradeFinanceManagementSystem\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{70D42D6A-622E-4A4A-89B6-92CD3C1175DA}|TradeSystem\\TradeSystem.csproj|c:\\users\\2420924\\source\\repos\\tradefinancemanagementsystem\\tradesystem\\views\\admindashboard\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{70D42D6A-622E-4A4A-89B6-92CD3C1175DA}|TradeSystem\\TradeSystem.csproj|solutionrelative:tradesystem\\views\\admindashboard\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{70D42D6A-622E-4A4A-89B6-92CD3C1175DA}|TradeSystem\\TradeSystem.csproj|c:\\users\\2420924\\source\\repos\\tradefinancemanagementsystem\\tradesystem\\views\\userdashboard\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{70D42D6A-622E-4A4A-89B6-92CD3C1175DA}|TradeSystem\\TradeSystem.csproj|solutionrelative:tradesystem\\views\\userdashboard\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{70D42D6A-622E-4A4A-89B6-92CD3C1175DA}|TradeSystem\\TradeSystem.csproj|c:\\users\\2420924\\source\\repos\\tradefinancemanagementsystem\\tradesystem\\data\\tfmsdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{70D42D6A-622E-4A4A-89B6-92CD3C1175DA}|TradeSystem\\TradeSystem.csproj|solutionrelative:tradesystem\\data\\tfmsdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{70D42D6A-622E-4A4A-89B6-92CD3C1175DA}|TradeSystem\\TradeSystem.csproj|c:\\users\\2420924\\source\\repos\\tradefinancemanagementsystem\\tradesystem\\views\\compliance\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{70D42D6A-622E-4A4A-89B6-92CD3C1175DA}|TradeSystem\\TradeSystem.csproj|solutionrelative:tradesystem\\views\\compliance\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{70D42D6A-622E-4A4A-89B6-92CD3C1175DA}|TradeSystem\\TradeSystem.csproj|c:\\users\\2420924\\source\\repos\\tradefinancemanagementsystem\\tradesystem\\views\\compliance\\run.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{70D42D6A-622E-4A4A-89B6-92CD3C1175DA}|TradeSystem\\TradeSystem.csproj|solutionrelative:tradesystem\\views\\compliance\\run.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 1,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedHeight": 383,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\Users\\2420924\\source\\repos\\TradeFinanceManagementSystem\\TradeSystem\\Views\\UserDashboard\\Index.cshtml",
+              "RelativeDocumentMoniker": "TradeSystem\\Views\\UserDashboard\\Index.cshtml",
+              "ToolTip": "C:\\Users\\2420924\\source\\repos\\TradeFinanceManagementSystem\\TradeSystem\\Views\\UserDashboard\\Index.cshtml",
+              "RelativeToolTip": "TradeSystem\\Views\\UserDashboard\\Index.cshtml",
+              "ViewState": "AgIAABgAAAAAAAAAAAAAACoAAACOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-08-26T17:59:39.895Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\Users\\2420924\\source\\repos\\TradeFinanceManagementSystem\\TradeSystem\\Views\\AdminDashboard\\Index.cshtml",
+              "RelativeDocumentMoniker": "TradeSystem\\Views\\AdminDashboard\\Index.cshtml",
+              "ToolTip": "C:\\Users\\2420924\\source\\repos\\TradeFinanceManagementSystem\\TradeSystem\\Views\\AdminDashboard\\Index.cshtml",
+              "RelativeToolTip": "TradeSystem\\Views\\AdminDashboard\\Index.cshtml",
+              "ViewState": "AgIAACQAAAAAAAAAAAAAADcAAABwAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-08-26T17:58:16.476Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "TFMSDbContext.cs",
+              "DocumentMoniker": "C:\\Users\\2420924\\source\\repos\\TradeFinanceManagementSystem\\TradeSystem\\Data\\TFMSDbContext.cs",
+              "RelativeDocumentMoniker": "TradeSystem\\Data\\TFMSDbContext.cs",
+              "ToolTip": "C:\\Users\\2420924\\source\\repos\\TradeFinanceManagementSystem\\TradeSystem\\Data\\TFMSDbContext.cs",
+              "RelativeToolTip": "TradeSystem\\Data\\TFMSDbContext.cs",
+              "ViewState": "AgIAADQAAAAAAAAAAAAwwE0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-20T08:51:47.155Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Run.cshtml",
+              "DocumentMoniker": "C:\\Users\\2420924\\source\\repos\\TradeFinanceManagementSystem\\TradeSystem\\Views\\Compliance\\Run.cshtml",
+              "RelativeDocumentMoniker": "TradeSystem\\Views\\Compliance\\Run.cshtml",
+              "ToolTip": "C:\\Users\\2420924\\source\\repos\\TradeFinanceManagementSystem\\TradeSystem\\Views\\Compliance\\Run.cshtml",
+              "RelativeToolTip": "TradeSystem\\Views\\Compliance\\Run.cshtml",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAAABIAAAANAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-08-20T08:51:04.472Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Details.cshtml",
+              "DocumentMoniker": "C:\\Users\\2420924\\source\\repos\\TradeFinanceManagementSystem\\TradeSystem\\Views\\Compliance\\Details.cshtml",
+              "RelativeDocumentMoniker": "TradeSystem\\Views\\Compliance\\Details.cshtml",
+              "ToolTip": "C:\\Users\\2420924\\source\\repos\\TradeFinanceManagementSystem\\TradeSystem\\Views\\Compliance\\Details.cshtml",
+              "RelativeToolTip": "TradeSystem\\Views\\Compliance\\Details.cshtml",
+              "ViewState": "AgIAAAkAAAAAAAAAAAAAABQAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-08-19T16:06:20.093Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

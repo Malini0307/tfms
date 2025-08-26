@@ -1,0 +1,22 @@
+﻿@model TradeSystem.Models.LetterOfCredit
+
+<h2>Close Letter of Credit</h2>
+<div class="alert alert-danger">Are you sure you want to close this LC?</div>
+<dl class="row">
+    <dt class="col-sm-2">Applicant</dt>
+    <dd class="col-sm-10">@Model.ApplicantName</dd>
+    <dt class="col-sm-2">Beneficiary</dt>
+    <dd class="col-sm-10">@Model.BeneficiaryName</dd>
+    <dt class="col-sm-2">Amount</dt>
+    <dd class="col-sm-10">@Model.Amount</dd>
+    <dt class="col-sm-2">Currency</dt>
+    <dd class="col-sm-10">@Model.Currency</dd>
+    <dt class="col-sm-2">Expiry</dt>
+    <dd class="col-sm-10">@Model.ExpiryDate.ToShortDateString()</dd>
+</dl>
+<form asp-action="Close" method="post">
+    <input type="hidden" asp-for="LcId" />
+    @Html.AntiForgeryToken()
+    <button type="submit" class="btn btn-danger">Close</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>

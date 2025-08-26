@@ -1,0 +1,73 @@
+﻿@{
+    ViewData["Title"] = "Admin Dashboard";
+    // Layout = "~/Views/Shared/_Layout1.cshtml";
+}
+<div class="container">
+    <h2 class="mb-4">
+        Welcome, <span class="fw-semibold" style="color: #6610f2;">@ViewBag.UserName</span>
+    </h2>    
+    <div class="row g-4">
+        @* <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body"><h5 class="card-title">Manage Users</h5><p class="card-text">Add/edit roles and accounts.</p>
+                    <a href="#" class="btn btn-primary">Go</a>
+                </div>
+            </div>
+        </div> *@
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body"><h5 class="card-title">Letters of Credit</h5><p class="card-text">Review/Close LC requests.</p>
+                    <a href="@Url.Action("Index", "LetterOfCredit")" class="btn fw-semibold" style="background-color: #7A2DF8; color: white;">View/Close LC</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body"><h5 class="card-title">Bank Guarantees</h5><p class="card-text">Issue and Monitor guarantees.</p>
+                    <a href="@Url.Action("Index", "BankGuarantee")" class="btn fw-semibold" style="background-color: #7A2DF8; color: white;">Issue Guarantee</a>
+                    </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Trade Documents</h5>
+                    <p class="card-text">Review documents uploaded by users.</p>
+                    <a asp-controller="TradeDocument" asp-action="Index" class="btn fw-semibold" style="background-color: #7A2DF8; color: white;">View Documents</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Risk Assessment</h5><p class="card-text">View transaction risk.</p>
+                    <a asp-controller="RiskAssessment" asp-action="Index" class="btn fw-semibold" style="background-color: #7A2DF8; color: white;">Analyze Risk</a>
+                    </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Compliance</h5>
+                    <p class="card-text">Generate and review compliance reports.</p>
+                    <div class="row">
+                        <div class="col-6 d-grid">
+                            <a asp-controller="Compliance" asp-action="Run" class="btn btn-secondary fw-semibold">Generate</a>
+                        </div>
+                        <div class="col-6 d-grid">
+                            <a asp-controller="Compliance" asp-action="Index" class="btn fw-semibold" style="background-color: #7A2DF8; color: white;">View Reports</a>
+                        </div>
+                    </div>
+
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Footer {
+    @await Html.PartialAsync("_Footer")
+}
+

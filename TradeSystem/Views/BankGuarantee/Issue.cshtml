@@ -1,0 +1,61 @@
+﻿@model TradeSystem.Models.BankGuarantee
+
+<h2>Issue Bank Guarantee</h2>
+<form asp-action="Issue" method="post" class="card p-3">
+    <input type="hidden" asp-for="GuaranteeId" />
+    <input type="hidden" asp-for="ApplicantName" />
+    <input type="hidden" asp-for="BeneficiaryName" />
+
+    <div class="mb-3">
+        <label class="form-label">LC Reference</label><br />
+        @if (Model.LetterOfCredit != null)
+        {
+            <a href="@Url.Action("Details", "LetterOfCredit", new { id = Model.LcId })">LC #@Model.LcId</a>
+        }
+        else
+        {
+
+            <span class="text-muted">N/A</span>
+        }
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Applicant</label>
+        <div class="form-control-plaintext">@Model.ApplicantName</div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Beneficiary</label>
+        <div class="form-control-plaintext">@Model.BeneficiaryName</div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Guarantee Amount</label>
+        <input asp-for="GuaranteeAmount" class="form-control" />
+        <span class="text-danger" asp-validation-for="GuaranteeAmount"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Currency</label>
+        <input asp-for="Currency" class="form-control" />
+        <span class="text-danger" asp-validation-for="Currency"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Validity Period</label>
+        <input asp-for="ValidityPeriod" type="date" class="form-control" />
+        <span class="text-danger" asp-validation-for="ValidityPeriod"></span>
+    </div>
+
+    @Html.AntiForgeryToken()
+    <div class="row g-2">
+        <div class="col-6">
+            <a asp-action="Index" class="btn btn-secondary w-100">Back</a>
+        </div>
+        <div class="col-6">
+            <button type="submit" class="btn btn-warning w-100">Issue Guarantee</button>
+        </div>
+    </div>
+
+    
+</form>

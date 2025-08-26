@@ -1,0 +1,61 @@
+﻿@model IEnumerable<TradeSystem.Models.TradeDocument>
+@{
+    ViewData["Title"] = "Trade Documents";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Trade Documents</h2>
+        @if (User.IsInRole("User"))
+        {
+            <a asp-action="Upload" class="btn btn-primary">Upload Document</a>
+        }
+    </div>
+
+    <table class="table table-hover table-bordered">
+        <thead class="table-light">
+            <tr>
+                <th>Ref #</th>
+                <th>Type</th>
+                <th>Uploaded By</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Linked To</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var d in Model)
+            {
+                <tr>
+                    <td>@d.ReferenceNumber</td>
+                    <td>@d.DocumentType</td>
+                    <td>@d.UploadedBy</td>
+                    <td>@d.UploadDate.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>@d.Status</td>
+                    <td>
+                        @if (d.LcId.HasValue)
+                        {
+                            <span>LC #@d.LcId</span>
+                        }
+                        @if (d.GuaranteeId.HasValue)
+                        {
+                            <span class="ms-2">BG #@d.GuaranteeId</span>
+                        }
+                        @if (!d.LcId.HasValue && !d.GuaranteeId.HasValue)
+                        {
+                            <span>-</span>
+                        }
+                    </td>
+                    <td class="text-end">
+                        <a asp-action="Details" asp-route-id="@d.DocumentId" class="btn btn-sm btn-info">View</a>
+                        @if (User.IsInRole("User"))
+                        {
+                            <a asp-action="Edit" asp-route-id="@d.DocumentId" class="btn btn-sm btn-warning ms-2">Edit</a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

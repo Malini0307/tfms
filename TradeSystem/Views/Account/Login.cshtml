@@ -1,0 +1,63 @@
+﻿@{
+    ViewData["Title"] = "Login";
+    var role = (string?)ViewBag.Role ?? "";
+    // Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">
+        Login @if(!string.IsNullOrEmpty(role)){
+        <text>as <strong>@role</strong></text>
+                }
+    </h2>
+
+    @if (TempData["Msg"] != null)
+    {
+        <div class="alert alert-success w-50 mx-auto text-center">@TempData["Msg"]</div>
+    }
+
+    @if (ViewBag.SwitchPrompt != null)
+    {
+        <div class="alert alert-warning w-50 mx-auto text-center">
+            @ViewBag.SwitchPrompt
+            @if (ViewBag.ForceLogoutUrl != null)
+            {
+                <div class="mt-2"><a class="btn btn-sm btn-outline-danger" href="@ViewBag.ForceLogoutUrl">Logout and continue</a></div>
+            }
+        </div>
+    }
+
+    <form method="post" class="w-50 mx-auto card p-4 shadow-sm border-0">
+        @if (!string.IsNullOrEmpty(role))
+        {
+            <input type="hidden" name="role" value="@role" />
+        }
+        <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input name="email" type="email" class="form-control" required />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Password</label>
+            <input type="password" name="password" class="form-control" required />
+        </div>
+        @if (string.IsNullOrEmpty(role))
+        {
+            <div class="mb-3">
+                <label class="form-label">Role</label>
+                <select name="role" class="form-select" required>
+                    <option value="">Select role</option>
+                    <option value="Admin">Admin</option>
+                    <option value="User">User</option>
+                </select>
+            </div>
+        }
+        @Html.AntiForgeryToken()
+        @if (ViewBag.Error != null)
+        {
+            <div class="alert alert-danger">@Html.Raw(ViewBag.Error)</div>
+        }
+        <button type="submit" class="btn w-100" style="background-color: #6610f2; color: white;">Login</button>
+        <div class="text-center mt-3" >
+            <a href="/Account/Register?role=@role" class="text-decoration-none">Don’t have an account? Register</a>
+        </div>
+    </form>
+</div>

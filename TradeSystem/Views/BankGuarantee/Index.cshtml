@@ -1,0 +1,67 @@
+﻿@model IEnumerable<TradeSystem.Models.BankGuarantee>
+
+<h2>Bank Guarantee List</h2>
+<p>
+    @if (User.IsInRole("User"))
+    {
+        <a class="btn btn-primary" href="@Url.Action("Create")">Request New Guarantee</a>
+    }
+</p>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>LC Reference</th>
+            <th>Applicant</th>
+            <th>Beneficiary</th>
+            <th>Amount</th>
+            <th>Currency</th>
+            <th>Validity Period</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @if (item.LetterOfCredit != null)
+                    {
+                        <a href="@Url.Action("Details", "LetterOfCredit", new { id = item.LcId })">LC #@item.LcId</a>
+                    }
+                    else
+                    {
+                        <span class="text-muted">N/A</span>
+                    }
+                </td>
+                <td>@item.ApplicantName</td>
+                <td>@item.BeneficiaryName</td>
+                <td>@item.GuaranteeAmount</td>
+                <td>@item.Currency</td>
+                <td>@item.ValidityPeriod.ToShortDateString()</td>
+                <td>
+                    @if (item.Status == TradeSystem.Models.BgStatus.Expired)
+                    {
+                        <span class="text-danger fw-bold">@item.Status</span>
+                    }
+                    else if (item.Status == TradeSystem.Models.BgStatus.Issued)
+                    {
+                        <span class="text-success fw-bold">@item.Status</span>
+                    }
+                    else
+                    {
+                        @item.Status
+                    }
+                </td>
+                <td class="d-flex gap-2">
+                    @if (User.IsInRole("Admin") && item.Status == TradeSystem.Models.BgStatus.Pending)
+                    {
+                        <a class="btn btn-warning" href="@Url.Action("Issue", new { id = item.GuaranteeId })">Issue</a>
+                    }
+                    <a class="btn btn-info" href="@Url.Action("Track", new { id = item.GuaranteeId })">Track</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
