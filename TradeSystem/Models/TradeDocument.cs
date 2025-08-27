@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -33,6 +33,11 @@ namespace TradeSystem.Models
 
         [Required]
         public TdStatus Status { get; set; }
+
+        // Ownership
+        public string? UserId { get; set; }
+        [ForeignKey(nameof(UserId))]
+        public ApplicationUser? User { get; set; }
 
         // Optional link to LC
         public int? LcId { get; set; }
