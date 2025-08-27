@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection.Emit;
 using TradeSystem.Models;
@@ -57,6 +57,12 @@ namespace TradeSystem.Data
                 .HasIndex(td => td.ReferenceNumber)
                 .IsUnique();
 
+            // Allow only one TradeDocument per LC (optional LC link)
+            builder.Entity<TradeDocument>()
+                .HasIndex(td => td.LcId)
+                .IsUnique()
+                .HasFilter("[LcId] IS NOT NULL");
+
             builder.Entity<Compliance>()
             .Property(c => c.ComplianceStatus)
             .HasConversion<string>();
@@ -70,6 +76,25 @@ namespace TradeSystem.Data
             builder.Entity<Compliance>()
                 .Property(x => x.PdfPath)
                 .HasMaxLength(300);
+
+            // Ownership relationships (optional FKs to AspNetUsers)
+            builder.Entity<LetterOfCredit>()
+                .HasOne(l => l.User)
+                .WithMany()
+                .HasForeignKey(l => l.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<BankGuarantee>()
+                .HasOne(b => b.User)
+                .WithMany()
+                .HasForeignKey(b => b.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<TradeDocument>()
+                .HasOne(t => t.User)
+                .WithMany()
+                .HasForeignKey(t => t.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
 
         }
 

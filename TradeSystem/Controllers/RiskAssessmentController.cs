@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using TradeSystem.Data;
 using TradeSystem.Interfaces;
@@ -10,43 +10,64 @@ namespace TradeSystem.Controllers
     {
         private readonly IRiskAssessmentService _riskService;
         private readonly ILetterOfCreditService _lcService;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly TFMSDbContext _db;
 
         public RiskAssessmentController(
             IRiskAssessmentService riskService,
-            ILetterOfCreditService lcService)
+            ILetterOfCreditService lcService,
+            UserManager<ApplicationUser> userManager,
+            TFMSDbContext db)
         {
             _riskService = riskService;
             _lcService = lcService;
+            _userManager = userManager;
+            _db = db;
         }
 
         [HttpGet]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            LoadLcDropdown();
+            await LoadLcDropdown();
             return View(model: null);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Index(int lcId)
+        public async Task<IActionResult> Index(int lcId)
         {
             if (lcId <= 0)
             {
-                LoadLcDropdown();
+                await LoadLcDropdown();
                 ModelState.AddModelError("", "Please select a Letter of Credit.");
                 return View(model: null);
             }
 
+            if (!User.IsInRole("Admin"))
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                var lcOwn = _db.LetterOfCredits.Any(l => l.LcId == lcId && l.UserId == currentUser!.Id);
+                if (!lcOwn) return Forbid();
+            }
+
             var assessment = _riskService.AnalyzeCollectiveByLcId(lcId);
             ViewBag.RiskStatus = GetStatus(assessment.RiskScore);
-            LoadLcDropdown(selectedLcId: lcId);
+            await LoadLcDropdown(selectedLcId: lcId);
             return View(assessment);
         }
 
-        private void LoadLcDropdown(int? selectedLcId = null)
+        private async Task LoadLcDropdown(int? selectedLcId = null)
         {
-            var lcItems = _lcService.GetAll()
-                                    .Where(l => l.Status == LCStatus.Open || l.Status == LCStatus.Amended)
+            var query = _lcService.GetAll()
+                                    .Where(l => l.Status == LCStatus.Open || l.Status == LCStatus.Amended);
+
+            if (!User.IsInRole("Admin"))
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                query = query.Where(l => l.UserId == currentUser!.Id);
+            }
+
+            var lcItems = query
                                     .OrderByDescending(l => l.LcId)
                                     .Select(l => new SelectListItem
                                     {

@@ -1,4 +1,4 @@
-﻿using TradeSystem.Data;
+using TradeSystem.Data;
 using TradeSystem.Interfaces;
 using TradeSystem.Models;
 

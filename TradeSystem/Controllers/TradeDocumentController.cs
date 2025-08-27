@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -46,15 +46,20 @@ namespace TradeSystem.Controllers
 
         private void LoadLookups()
         {
-            // LC visible if status is Open or Amended
+            var currentUserId = _userManager.GetUserId(User);
+
+            // LC visible if status is Open or Amended and owned by current user (unless Admin)
             var lcs = _db.LetterOfCredits
-                         .Where(l => l.Status == LCStatus.Open || l.Status == LCStatus.Amended)
+                         .Where(l => (l.Status == LCStatus.Open || l.Status == LCStatus.Amended)
+                                  && (User.IsInRole("Admin") || l.UserId == currentUserId))
+                         .Where(l => !_db.TradeDocuments.Any(td => td.LcId == l.LcId))
                          .Select(l => new { l.LcId, Label = $"LC #{l.LcId} - {l.BeneficiaryName}" })
                          .ToList();
 
-            // BG visible if Issued
+            // BG visible if Issued and owned by current user (unless Admin)
             var bgs = _db.BankGuarantees
-                         .Where(g => g.Status == BgStatus.Issued)
+                         .Where(g => g.Status == BgStatus.Issued
+                                  && (User.IsInRole("Admin") || g.UserId == currentUserId))
                          .Select(g => new { g.GuaranteeId, Label = $"BG #{g.GuaranteeId} - {g.BeneficiaryName}" })
                          .ToList();
 
@@ -64,9 +69,11 @@ namespace TradeSystem.Controllers
         }
 
         // List
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            var docs = _service.GetAllDocumentsById();
+            var currentUser = await _userManager.GetUserAsync(User);
+            bool isAdmin = User.IsInRole("Admin");
+            var docs = _service.GetAllDocuments(currentUser?.Id, isAdmin);
             return View(docs);
         }
 
@@ -89,6 +96,8 @@ namespace TradeSystem.Controllers
         public async Task<IActionResult> Upload([Bind("DocumentType,Status,LcId,GuaranteeId,ReferenceNumber")] TradeDocument doc)
         {
             doc.UploadedBy = await GetCurrentDisplayNameAsync();
+            var currentUser = await _userManager.GetUserAsync(User);
+            doc.UserId = currentUser?.Id;
 
             ModelState.Remove(nameof(TradeDocument.ReferenceNumber));
             ModelState.Remove(nameof(TradeDocument.UploadedBy));
@@ -104,7 +113,7 @@ namespace TradeSystem.Controllers
             {
                 if (!_service.UploadDocument(doc))
                 {
-                    ModelState.AddModelError("", "Failed to upload document (duplicate reference or server error). Please try again.");
+                    ModelState.AddModelError("", "A Trade Document already exists for the selected LC or an error occurred.");
                     LoadLookups();
                     return View(doc);
                 }
@@ -121,10 +130,20 @@ namespace TradeSystem.Controllers
 
         // Details
         [HttpGet]
-        public IActionResult Details(int id)
+        public async Task<IActionResult> Details(int id)
         {
             var doc = _service.ViewDocument(id);
             if (doc == null) return NotFound();
+            if (!User.IsInRole("Admin"))
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (doc.UserId != currentUser?.Id
+                    && !(doc.LcId != null && _db.LetterOfCredits.Any(l => l.LcId == doc.LcId && l.UserId == currentUser!.Id))
+                    && !(doc.GuaranteeId != null && _db.BankGuarantees.Any(b => b.GuaranteeId == doc.GuaranteeId && b.UserId == currentUser!.Id)))
+                {
+                    return Forbid();
+                }
+            }
             LoadLookups();
             return View(doc);
         }
@@ -132,10 +151,20 @@ namespace TradeSystem.Controllers
         // Edit (User only)
         [Authorize(Roles = "User")]
         [HttpGet]
-        public IActionResult Edit(int id)
+        public async Task<IActionResult> Edit(int id)
         {
             var doc = _service.ViewDocument(id);
             if (doc == null) return NotFound();
+            if (!User.IsInRole("Admin"))
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (doc.UserId != currentUser?.Id
+                    && !(doc.LcId != null && _db.LetterOfCredits.Any(l => l.LcId == doc.LcId && l.UserId == currentUser!.Id))
+                    && !(doc.GuaranteeId != null && _db.BankGuarantees.Any(b => b.GuaranteeId == doc.GuaranteeId && b.UserId == currentUser!.Id)))
+                {
+                    return Forbid();
+                }
+            }
             LoadLookups();
             return View(doc);
         }

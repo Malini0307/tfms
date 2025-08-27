@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 using TradeSystem.Interfaces;
 
@@ -56,6 +56,12 @@ namespace TradeSystem.Services
             var lc = _context.LetterOfCredits.Find(lcId);
             if (lc == null) return false;
 
+            // Enforce one active/pending guarantee per LC
+            if (_context.BankGuarantees.Any(b => b.LcId == lcId && b.Status != BgStatus.Expired))
+            {
+                return false;
+            }
+
             var bg = new BankGuarantee
             {
                 LcId = lc.LcId,
@@ -64,7 +70,8 @@ namespace TradeSystem.Services
                 GuaranteeAmount = customAmount ?? lc.Amount,
                 Currency = lc.Currency,
                 ValidityPeriod = validityPeriod,
-                Status = BgStatus.Pending
+                Status = BgStatus.Pending,
+                UserId = lc.UserId
             };
 
             try

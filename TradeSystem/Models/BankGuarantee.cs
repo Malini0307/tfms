@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using TradeSystem.Models;
 
@@ -39,7 +39,10 @@ namespace TradeSystem.Models
         [Required]
         public BgStatus Status { get; set; } = BgStatus.Pending;
 
-
+        // Ownership
+        public string? UserId { get; set; }
+        [ForeignKey(nameof(UserId))]
+        public ApplicationUser? User { get; set; }
 
         // Navigation properties
         public ICollection<TradeDocument> TradeDocuments { get; set; }

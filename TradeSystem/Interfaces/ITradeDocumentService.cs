@@ -1,4 +1,4 @@
-﻿using TradeSystem.Models;
+using TradeSystem.Models;
 
 namespace TradeSystem.Interfaces
 {
@@ -7,6 +7,6 @@ namespace TradeSystem.Interfaces
         bool UploadDocument(TradeDocument doc);
         TradeDocument ViewDocument(int id);
         bool UpdateDocumentDetails(TradeDocument updatedDoc);
-        IEnumerable<TradeDocument> GetAllDocumentsById();
+        IEnumerable<TradeDocument> GetAllDocuments(string? userId, bool isAdmin);
     }
 }
