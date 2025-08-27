@@ -43,6 +43,7 @@ namespace TradeSystem.Controllers
             var lcs = _context.LetterOfCredits
                               .Where(l => l.Status != LCStatus.Closed)
                               .Where(l => User.IsInRole("Admin") || l.UserId == currentUser!.Id)
+                              .Where(l => !_context.BankGuarantees.Any(b => b.LcId == l.LcId && b.Status != BgStatus.Expired))
                               .OrderByDescending(l => l.LcId)
                               .Select(l => new SelectListItem
                               {

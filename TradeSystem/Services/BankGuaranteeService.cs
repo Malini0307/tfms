@@ -56,6 +56,12 @@ namespace TradeSystem.Services
             var lc = _context.LetterOfCredits.Find(lcId);
             if (lc == null) return false;
 
+            // Enforce one active/pending guarantee per LC
+            if (_context.BankGuarantees.Any(b => b.LcId == lcId && b.Status != BgStatus.Expired))
+            {
+                return false;
+            }
+
             var bg = new BankGuarantee
             {
                 LcId = lc.LcId,
