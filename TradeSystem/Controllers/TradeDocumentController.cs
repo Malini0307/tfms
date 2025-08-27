@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -44,17 +44,22 @@ namespace TradeSystem.Controllers
             return User.Identity?.Name ?? "Unknown";
         }
 
-        private void LoadLookups()
+        private async Task LoadLookups()
         {
-            // LC visible if status is Open or Amended
+            var currentUser = await _userManager.GetUserAsync(User);
+            var isAdmin = await _userManager.IsInRoleAsync(currentUser, "Admin");
+            
+            // LC visible if status is Open or Amended, and user has access
             var lcs = _db.LetterOfCredits
                          .Where(l => l.Status == LCStatus.Open || l.Status == LCStatus.Amended)
+                         .Where(l => isAdmin || l.CreatedByUserId == currentUser.Id)
                          .Select(l => new { l.LcId, Label = $"LC #{l.LcId} - {l.BeneficiaryName}" })
                          .ToList();
 
-            // BG visible if Issued
+            // BG visible if Issued, and user has access
             var bgs = _db.BankGuarantees
                          .Where(g => g.Status == BgStatus.Issued)
+                         .Where(g => isAdmin || g.CreatedByUserId == currentUser.Id)
                          .Select(g => new { g.GuaranteeId, Label = $"BG #{g.GuaranteeId} - {g.BeneficiaryName}" })
                          .ToList();
 
@@ -64,9 +69,21 @@ namespace TradeSystem.Controllers
         }
 
         // List
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            var docs = _service.GetAllDocumentsById();
+            var currentUser = await _userManager.GetUserAsync(User);
+            var isAdmin = await _userManager.IsInRoleAsync(currentUser, "Admin");
+            
+            IEnumerable<TradeDocument> docs;
+            if (isAdmin)
+            {
+                docs = _service.GetAllDocumentsById();
+            }
+            else
+            {
+                docs = _service.GetDocumentsByUserId(currentUser.Id);
+            }
+            
             return View(docs);
         }
 
@@ -74,13 +91,13 @@ namespace TradeSystem.Controllers
 
         [Authorize(Roles = "User")]
         [HttpGet]
-        public IActionResult Upload()
+        public async Task<IActionResult> Upload()
         {
             var model = new TradeDocument
             {
                 Status = TdStatus.Active
             };
-            LoadLookups();
+            await LoadLookups();
             return View(model);
         }
 
@@ -96,16 +113,17 @@ namespace TradeSystem.Controllers
 
             if (!ModelState.IsValid)
             {
-                LoadLookups();
+                await LoadLookups();
                 return View(doc);
             }
 
             try
             {
-                if (!_service.UploadDocument(doc))
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (!_service.UploadDocument(doc, currentUser.Id))
                 {
                     ModelState.AddModelError("", "Failed to upload document (duplicate reference or server error). Please try again.");
-                    LoadLookups();
+                    await LoadLookups();
                     return View(doc);
                 }
 
@@ -114,46 +132,60 @@ namespace TradeSystem.Controllers
             catch (Exception ex)
             {
                 ModelState.AddModelError("", $"Upload Failed: {ex.GetBaseException().Message}");
-                LoadLookups();
+                await LoadLookups();
                 return View(doc);
             }
         }
 
         // Details
         [HttpGet]
-        public IActionResult Details(int id)
+        public async Task<IActionResult> Details(int id)
         {
-            var doc = _service.ViewDocument(id);
+            var currentUser = await _userManager.GetUserAsync(User);
+            var isAdmin = await _userManager.IsInRoleAsync(currentUser, "Admin");
+            
+            TradeDocument? doc;
+            if (isAdmin)
+            {
+                doc = _service.ViewDocument(id);
+            }
+            else
+            {
+                doc = _service.ViewDocumentByUserId(id, currentUser.Id);
+            }
+            
             if (doc == null) return NotFound();
-            LoadLookups();
+            await LoadLookups();
             return View(doc);
         }
 
         // Edit (User only)
         [Authorize(Roles = "User")]
         [HttpGet]
-        public IActionResult Edit(int id)
+        public async Task<IActionResult> Edit(int id)
         {
-            var doc = _service.ViewDocument(id);
+            var currentUser = await _userManager.GetUserAsync(User);
+            var doc = _service.ViewDocumentByUserId(id, currentUser.Id);
             if (doc == null) return NotFound();
-            LoadLookups();
+            await LoadLookups();
             return View(doc);
         }
 
         [Authorize(Roles = "User")]
         [HttpPost, ValidateAntiForgeryToken]
-        public IActionResult Edit(TradeDocument doc)
+        public async Task<IActionResult> Edit(TradeDocument doc)
         {
             if (!ModelState.IsValid)
             {
-                LoadLookups();
+                await LoadLookups();
                 return View(doc);
             }
 
-            if (!_service.UpdateDocumentDetails(doc))
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (!_service.UpdateDocumentDetails(doc, currentUser.Id))
             {
                 ModelState.AddModelError("", "Failed to update document.");
-                LoadLookups();
+                await LoadLookups();
                 return View(doc);
             }
 

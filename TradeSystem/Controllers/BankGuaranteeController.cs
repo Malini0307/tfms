@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -13,21 +14,40 @@ namespace TradeSystem.Controllers
     {
         private readonly TFMSDbContext _context;
         private readonly IBankGuaranteeService _bgService;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-
-        public BankGuaranteeController(IBankGuaranteeService bgService, TFMSDbContext context)
+        public BankGuaranteeController(IBankGuaranteeService bgService, TFMSDbContext context, UserManager<ApplicationUser> userManager)
         {
             _bgService = bgService;
             _context = context;
+            _userManager = userManager;
         }
 
-        public IActionResult Index() => View(_bgService.GetAll());
+        public async Task<IActionResult> Index()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+            
+            if (isAdmin)
+            {
+                return View(_bgService.GetAll());
+            }
+            else
+            {
+                return View(_bgService.GetByUserId(user.Id));
+            }
+        }
 
         [Authorize(Roles = "User")]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            var user = await _userManager.GetUserAsync(User);
+            var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+            
+            // Users can only see their own LCs, admins can see all
             var lcs = _context.LetterOfCredits
-                              .Where(l => l.Status != LCStatus.Closed)
+                              .Where(l => l.Status != LCStatus.Closed && 
+                                        (isAdmin || l.CreatedByUserId == user.Id))
                               .OrderByDescending(l => l.LcId)
                               .Select(l => new SelectListItem
                               {
@@ -42,7 +62,7 @@ namespace TradeSystem.Controllers
         [HttpPost]
         [Authorize(Roles = "User")]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(int lcId, System.DateTime validityPeriod, decimal? customAmount)
+        public async Task<IActionResult> Create(int lcId, System.DateTime validityPeriod, decimal? customAmount)
         {
             if (lcId <= 0)
             {
@@ -51,14 +71,15 @@ namespace TradeSystem.Controllers
 
             if (!ModelState.IsValid)
             {
-                return Create(); // reload LCs & view
+                return await Create(); // reload LCs & view
             }
 
-            var ok = _bgService.RequestGuaranteeFromLC(lcId, validityPeriod, customAmount);
+            var user = await _userManager.GetUserAsync(User);
+            var ok = _bgService.RequestGuaranteeFromLC(lcId, validityPeriod, customAmount, user.Id);
             if (!ok)
             {
                 ModelState.AddModelError("", "Unable to create Bank Guarantee from the selected LC.");
-                return Create();
+                return await Create();
             }
             return RedirectToAction(nameof(Index));
         }
@@ -89,9 +110,21 @@ namespace TradeSystem.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        public IActionResult Track(int id)
+        public async Task<IActionResult> Track(int id)
         {
-            var bg = _bgService.GetById(id);
+            var user = await _userManager.GetUserAsync(User);
+            var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+            
+            BankGuarantee? bg;
+            if (isAdmin)
+            {
+                bg = _bgService.GetById(id);
+            }
+            else
+            {
+                bg = _bgService.GetByIdAndUserId(id, user.Id);
+            }
+            
             if (bg == null) return NotFound();
             return View(bg);
         }

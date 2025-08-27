@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
@@ -34,7 +34,21 @@ namespace TradeSystem.Services
                            .ToList();
         }
 
-        public bool GenerateComplianceReport(Compliance compliance, string webRootPath)
+        public List<int> GetAvailableLcIdsByUserId(string userId)
+        {
+            var used = _context.Compliances
+                               .Where(c => c.LcId.HasValue)
+                               .Select(c => c.LcId!.Value)
+                               .ToList();
+
+            return _context.LetterOfCredits
+                           .Where(l => !used.Contains(l.LcId) && l.CreatedByUserId == userId)
+                           .Select(l => l.LcId)
+                           .OrderByDescending(x => x)
+                           .ToList();
+        }
+
+        public bool GenerateComplianceReport(Compliance compliance, string webRootPath, string userId)
         {
             if (compliance == null) return false;
 
@@ -150,6 +164,8 @@ namespace TradeSystem.Services
             compliance.ReportDate = DateTime.UtcNow;
             compliance.OverallRiskScore = normalized;
             compliance.FindingsJson = JsonSerializer.Serialize(findings);
+            compliance.CreatedByUserId = userId;
+            compliance.CreatedDate = DateTime.UtcNow;
 
             // If your model has IsFinalized, set it; otherwise remove this line.
             compliance.IsFinalized = false;
@@ -200,9 +216,21 @@ namespace TradeSystem.Services
                        .Include(c => c.LetterOfCredit)
                        .FirstOrDefault(c => c.ComplianceId == id);
 
+        public Compliance? GetComplianceByIdAndUserId(int id, string userId)
+            => _context.Compliances
+                       .Include(c => c.LetterOfCredit)
+                       .FirstOrDefault(c => c.ComplianceId == id && c.CreatedByUserId == userId);
+
         public List<Compliance> GetAllCompliances()
             => _context.Compliances
                        .Include(c => c.LetterOfCredit)
+                       .OrderByDescending(c => c.ReportDate)
+                       .ToList();
+
+        public List<Compliance> GetCompliancesByUserId(string userId)
+            => _context.Compliances
+                       .Include(c => c.LetterOfCredit)
+                       .Where(c => c.CreatedByUserId == userId)
                        .OrderByDescending(c => c.ReportDate)
                        .ToList();
 
