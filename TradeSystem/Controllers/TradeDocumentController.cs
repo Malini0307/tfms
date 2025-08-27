@@ -46,15 +46,19 @@ namespace TradeSystem.Controllers
 
         private void LoadLookups()
         {
-            // LC visible if status is Open or Amended
+            var currentUserId = _userManager.GetUserId(User);
+
+            // LC visible if status is Open or Amended and owned by current user (unless Admin)
             var lcs = _db.LetterOfCredits
-                         .Where(l => l.Status == LCStatus.Open || l.Status == LCStatus.Amended)
+                         .Where(l => (l.Status == LCStatus.Open || l.Status == LCStatus.Amended)
+                                  && (User.IsInRole("Admin") || l.UserId == currentUserId))
                          .Select(l => new { l.LcId, Label = $"LC #{l.LcId} - {l.BeneficiaryName}" })
                          .ToList();
 
-            // BG visible if Issued
+            // BG visible if Issued and owned by current user (unless Admin)
             var bgs = _db.BankGuarantees
-                         .Where(g => g.Status == BgStatus.Issued)
+                         .Where(g => g.Status == BgStatus.Issued
+                                  && (User.IsInRole("Admin") || g.UserId == currentUserId))
                          .Select(g => new { g.GuaranteeId, Label = $"BG #{g.GuaranteeId} - {g.BeneficiaryName}" })
                          .ToList();
 
