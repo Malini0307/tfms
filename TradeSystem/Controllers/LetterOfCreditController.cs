@@ -40,6 +40,12 @@ namespace TradeSystem.Controllers
             {
                 var currentUser = await _userManager.GetUserAsync(User);
                 lc.UserId = currentUser?.Id;
+                // Enforce one Letter of Credit per user
+                if (!User.IsInRole("Admin") && _db.LetterOfCredits.Any(x => x.UserId == currentUser!.Id))
+                {
+                    ModelState.AddModelError("", "You can create only one Letter of Credit.");
+                    return View(lc);
+                }
                 _lcService.CreateLetterOfCredit(lc);
                 return RedirectToAction(nameof(Index));
             }
