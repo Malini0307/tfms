@@ -57,6 +57,12 @@ namespace TradeSystem.Data
                 .HasIndex(td => td.ReferenceNumber)
                 .IsUnique();
 
+            // Allow only one TradeDocument per LC (optional LC link)
+            builder.Entity<TradeDocument>()
+                .HasIndex(td => td.LcId)
+                .IsUnique()
+                .HasFilter("[LcId] IS NOT NULL");
+
             builder.Entity<Compliance>()
             .Property(c => c.ComplianceStatus)
             .HasConversion<string>();

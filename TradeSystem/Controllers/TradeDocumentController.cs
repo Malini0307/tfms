@@ -52,6 +52,7 @@ namespace TradeSystem.Controllers
             var lcs = _db.LetterOfCredits
                          .Where(l => (l.Status == LCStatus.Open || l.Status == LCStatus.Amended)
                                   && (User.IsInRole("Admin") || l.UserId == currentUserId))
+                         .Where(l => !_db.TradeDocuments.Any(td => td.LcId == l.LcId))
                          .Select(l => new { l.LcId, Label = $"LC #{l.LcId} - {l.BeneficiaryName}" })
                          .ToList();
 
@@ -112,7 +113,7 @@ namespace TradeSystem.Controllers
             {
                 if (!_service.UploadDocument(doc))
                 {
-                    ModelState.AddModelError("", "Failed to upload document (duplicate reference or server error). Please try again.");
+                    ModelState.AddModelError("", "A Trade Document already exists for the selected LC or an error occurred.");
                     LoadLookups();
                     return View(doc);
                 }

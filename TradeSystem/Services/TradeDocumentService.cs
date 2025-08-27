@@ -25,6 +25,12 @@ namespace TradeSystem.Services
 
         public bool UploadDocument(TradeDocument doc)
         {
+            // Prevent multiple trade documents for the same LC
+            if (doc.LcId != null && _context.TradeDocuments.Any(d => d.LcId == doc.LcId))
+            {
+                return false;
+            }
+
             // Ensure unique ReferenceNumber (generate if missing or duplicate)
             if (string.IsNullOrWhiteSpace(doc.ReferenceNumber) || _context.TradeDocuments.Any(d => d.ReferenceNumber == doc.ReferenceNumber))
             {
