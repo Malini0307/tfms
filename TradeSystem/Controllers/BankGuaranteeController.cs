@@ -29,7 +29,10 @@ namespace TradeSystem.Controllers
                 return View(_bgService.GetAll());
 
             var currentUser = await _userManager.GetUserAsync(User);
-            var list = _bgService.GetAll().Where(b => b.UserId == currentUser!.Id);
+            var list = _bgService.GetAll()
+                .Where(b => b.UserId == currentUser!.Id
+                         || (b.LetterOfCredit != null && b.LetterOfCredit.UserId == currentUser!.Id))
+                .ToList();
             return View(list);
         }
 
@@ -72,6 +75,12 @@ namespace TradeSystem.Controllers
             if (!User.IsInRole("Admin"))
             {
                 var currentUser = await _userManager.GetUserAsync(User);
+                // Claim ownership if LC has no owner yet
+                if (string.IsNullOrWhiteSpace(lc.UserId))
+                {
+                    lc.UserId = currentUser?.Id;
+                    _context.SaveChanges();
+                }
                 if (lc.UserId != currentUser?.Id) return Forbid();
             }
 
