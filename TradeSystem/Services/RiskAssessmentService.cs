@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using TradeSystem.Data;
 using TradeSystem.Interfaces;
@@ -14,25 +14,60 @@ namespace TradeSystem.Services
             this._context = context;
         }
 
-        public RiskAssessment AnalyzeByLcId(int lcId)
+        public IEnumerable<RiskAssessment> GetAll()
+        {
+            return _context.RiskAssessments
+                .Include(r => r.LetterOfCredit)
+                .Include(r => r.BankGuarantee)
+                .OrderByDescending(r => r.AssessmentDate)
+                .ToList();
+        }
+
+        public IEnumerable<RiskAssessment> GetByUserId(string userId)
+        {
+            return _context.RiskAssessments
+                .Include(r => r.LetterOfCredit)
+                .Include(r => r.BankGuarantee)
+                .Where(r => r.CreatedByUserId == userId)
+                .OrderByDescending(r => r.AssessmentDate)
+                .ToList();
+        }
+
+        public RiskAssessment? GetById(int id)
+        {
+            return _context.RiskAssessments
+                .Include(r => r.LetterOfCredit)
+                .Include(r => r.BankGuarantee)
+                .FirstOrDefault(r => r.RiskId == id);
+        }
+
+        public RiskAssessment? GetByIdAndUserId(int id, string userId)
+        {
+            return _context.RiskAssessments
+                .Include(r => r.LetterOfCredit)
+                .Include(r => r.BankGuarantee)
+                .FirstOrDefault(r => r.RiskId == id && r.CreatedByUserId == userId);
+        }
+
+        public RiskAssessment AnalyzeByLcId(int lcId, string userId)
         {
             var lc = _context.LetterOfCredits.FirstOrDefault(l => l.LcId == lcId);
             if (lc == null) 
                 throw new ArgumentException("Letter of Credit not found.");
             var bg = _context.BankGuarantees.FirstOrDefault(b => b.LcId == lcId);
-            return ComputeRisk(lc, bg, null);
+            return ComputeRisk(lc, bg, null, userId);
         }
 
-        public RiskAssessment AnalyzeByBgId(int guaranteeId)
+        public RiskAssessment AnalyzeByBgId(int guaranteeId, string userId)
         {
             var bg = _context.BankGuarantees.FirstOrDefault(b => b.GuaranteeId == guaranteeId);
             if (bg == null) 
                 throw new ArgumentException("Bank Guarantee not found.");
             var lc = _context.LetterOfCredits.FirstOrDefault(l => l.LcId == bg.LcId);
-            return ComputeRisk(lc, bg, null);
+            return ComputeRisk(lc, bg, null, userId);
         }
 
-        public RiskAssessment AnalyzeByReference(string referenceNumber)
+        public RiskAssessment AnalyzeByReference(string referenceNumber, string userId)
         {
             if (string.IsNullOrWhiteSpace(referenceNumber)) 
                 throw new ArgumentException("Reference number is required.");
@@ -41,11 +76,11 @@ namespace TradeSystem.Services
                 throw new ArgumentException("Trade Document with the given reference was not found.");
             var lc = doc.LcId.HasValue ? _context.LetterOfCredits.FirstOrDefault(l => l.LcId == doc.LcId) : null;
             var bg = doc.GuaranteeId.HasValue ? _context.BankGuarantees.FirstOrDefault(b => b.GuaranteeId == doc.GuaranteeId) : null;
-            return ComputeRisk(lc, bg, doc);
+            return ComputeRisk(lc, bg, doc, userId);
         }
 
         // Collective analysis: LC + all related BGs + all related Trade Documents
-        public RiskAssessment AnalyzeCollectiveByLcId(int lcId)
+        public RiskAssessment AnalyzeCollectiveByLcId(int lcId, string userId)
         {
             var lc = _context.LetterOfCredits.FirstOrDefault(l => l.LcId == lcId);
             if (lc == null) 
@@ -100,25 +135,20 @@ namespace TradeSystem.Services
             // Trade Document factors (aggregate)
             if (tds.Count > 0)
             {
-                var docCount = tds.Count;
-                var docPenalty = docCount < 2 ? 10 : docCount < 5 ? 5 : 0; // fewer docs -> more penalty
-                score += docPenalty; 
-                factors["TradeDocCountPenalty"] = docPenalty; 
-                factors["TradeDocCount"] = docCount;
+                var docCountScore = Math.Min(tds.Count * 2m, 20m);
+                score += docCountScore; 
+                factors["TradeDocCountScore"] = docCountScore; 
+                factors["TradeDocCount"] = tds.Count;
 
-                var archivedCount = tds.Count(t => t.Status == TdStatus.Archived);
-                var archivedPenalty = archivedCount * 2;
-                score += archivedPenalty; 
-                factors["ArchivedDocsPenalty"] = archivedPenalty; 
-                factors["ArchivedDocs"] = archivedCount;
+                var activeDocs = tds.Count(t => t.Status == TdStatus.Active);
+                var docStatusScore = activeDocs > 0 ? 10m : 25m; // Penalize if no active docs
+                score += docStatusScore; 
+                factors["TradeDocStatusScore"] = docStatusScore; 
+                factors["ActiveTradeDocs"] = activeDocs;
             }
 
-            // Normalize and cap
-            //var normalized = Math.Min((score / 165m) * 100m, 100m);
-            HttpClient client = new HttpClient();
-            client.BaseAddress = new Uri("https://localhost:7099/api/");
-            var task = client.GetFromJsonAsync<decimal>("TradeSystemAPI?score=" + score);
-            task.Wait();
+            // Normalize to 0-100 scale
+            var task = Task.Run(() => Math.Min((score / 165m) * 100m, 100m));
             decimal normalized = 0;
             if (task.IsCompleted)
             {
@@ -131,7 +161,9 @@ namespace TradeSystem.Services
                 RiskFactors = System.Text.Json.JsonSerializer.Serialize(factors),
                 RiskScore = normalized,
                 AssessmentDate = DateTime.UtcNow,
-                LcId = lc.LcId
+                LcId = lc.LcId,
+                CreatedByUserId = userId,
+                CreatedDate = DateTime.UtcNow
             };
 
             _context.RiskAssessments.Add(assessment);
@@ -149,7 +181,7 @@ namespace TradeSystem.Services
         }
 
         // Point-in-time risk from a single LC/BG/Doc (kept for API completeness)
-        private RiskAssessment ComputeRisk(LetterOfCredit? lc, BankGuarantee? bg, TradeDocument? doc)
+        private RiskAssessment ComputeRisk(LetterOfCredit? lc, BankGuarantee? bg, TradeDocument? doc, string userId)
         {
             var factors = new Dictionary<string, object>();
             decimal score = 0;
@@ -205,7 +237,9 @@ namespace TradeSystem.Services
                 RiskScore = normalized,
                 AssessmentDate = DateTime.UtcNow,
                 LcId = lc?.LcId,
-                GuaranteeId = bg?.GuaranteeId
+                GuaranteeId = bg?.GuaranteeId,
+                CreatedByUserId = userId,
+                CreatedDate = DateTime.UtcNow
             };
 
             _context.RiskAssessments.Add(assessment);

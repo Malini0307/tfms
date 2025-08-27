@@ -1,4 +1,4 @@
-﻿using TradeSystem.Data;
+using TradeSystem.Data;
 using TradeSystem.Interfaces;
 using TradeSystem.Models;
 
@@ -17,16 +17,31 @@ namespace TradeSystem.Services
             return _context.LetterOfCredits.ToList();
         }
 
+        public IEnumerable<LetterOfCredit> GetByUserId(string userId)
+        {
+            return _context.LetterOfCredits
+                .Where(lc => lc.CreatedByUserId == userId)
+                .ToList();
+        }
+
         public LetterOfCredit? GetById(int id)
         {
             return _context.LetterOfCredits.Find(id);
         }
 
-        public bool CreateLetterOfCredit(LetterOfCredit lc)
+        public LetterOfCredit? GetByIdAndUserId(int id, string userId)
+        {
+            return _context.LetterOfCredits
+                .FirstOrDefault(lc => lc.LcId == id && lc.CreatedByUserId == userId);
+        }
+
+        public bool CreateLetterOfCredit(LetterOfCredit lc, string userId)
         {
             try
             {
                 lc.Status = LCStatus.Open;
+                lc.CreatedByUserId = userId;
+                lc.CreatedDate = DateTime.UtcNow;
                 _context.LetterOfCredits.Add(lc);
                 _context.SaveChanges();
                 return true;
@@ -34,11 +49,12 @@ namespace TradeSystem.Services
             catch { return false; }
         }
 
-        public bool AmendLetterOfCredit(LetterOfCredit lc)
+        public bool AmendLetterOfCredit(LetterOfCredit lc, string userId)
         {
             try
             {
-                var existing = _context.LetterOfCredits.Find(lc.LcId);
+                var existing = _context.LetterOfCredits
+                    .FirstOrDefault(l => l.LcId == lc.LcId && l.CreatedByUserId == userId);
                 if (existing == null || existing.Status == LCStatus.Closed) return false;
                 existing.ApplicantName = lc.ApplicantName;
                 existing.BeneficiaryName = lc.BeneficiaryName;

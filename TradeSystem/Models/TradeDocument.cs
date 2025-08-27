@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -33,6 +33,13 @@ namespace TradeSystem.Models
 
         [Required]
         public TdStatus Status { get; set; }
+
+        // User tracking fields
+        [Required]
+        public string CreatedByUserId { get; set; }
+        
+        [Required]
+        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
 
         // Optional link to LC
         public int? LcId { get; set; }

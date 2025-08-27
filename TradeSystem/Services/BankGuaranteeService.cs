@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 using TradeSystem.Interfaces;
 
@@ -26,11 +26,36 @@ namespace TradeSystem.Services
             return list;
         }
 
+        public IEnumerable<BankGuarantee> GetByUserId(string userId)
+        {
+            var list = _context.BankGuarantees
+                .Include(bg => bg.LetterOfCredit)
+                .Where(bg => bg.CreatedByUserId == userId)
+                .ToList();
+            foreach (var bg in list)
+            {
+                CheckAndUpdateExpiry(bg);
+            }
+            return list;
+        }
+
         public BankGuarantee? GetById(int id)
         {
             var bg = _context.BankGuarantees
                      .Include(b => b.LetterOfCredit)
                      .FirstOrDefault(b => b.GuaranteeId == id);
+            if (bg != null)
+            {
+                CheckAndUpdateExpiry(bg);
+            }
+            return bg;
+        }
+
+        public BankGuarantee? GetByIdAndUserId(int id, string userId)
+        {
+            var bg = _context.BankGuarantees
+                     .Include(b => b.LetterOfCredit)
+                     .FirstOrDefault(b => b.GuaranteeId == id && b.CreatedByUserId == userId);
             if (bg != null)
             {
                 CheckAndUpdateExpiry(bg);
@@ -51,7 +76,7 @@ namespace TradeSystem.Services
 
         }
 
-        public bool RequestGuaranteeFromLC(int lcId, DateTime validityPeriod, decimal? customAmount = null)
+        public bool RequestGuaranteeFromLC(int lcId, DateTime validityPeriod, decimal? customAmount = null, string userId = null)
         {
             var lc = _context.LetterOfCredits.Find(lcId);
             if (lc == null) return false;
@@ -64,7 +89,9 @@ namespace TradeSystem.Services
                 GuaranteeAmount = customAmount ?? lc.Amount,
                 Currency = lc.Currency,
                 ValidityPeriod = validityPeriod,
-                Status = BgStatus.Pending
+                Status = BgStatus.Pending,
+                CreatedByUserId = userId ?? lc.CreatedByUserId,
+                CreatedDate = DateTime.UtcNow
             };
 
             try

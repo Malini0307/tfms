@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using TradeSystem.Interfaces;
 using TradeSystem.Models;
@@ -9,15 +10,29 @@ namespace TradeSystem.Controllers
     public class LetterOfCreditController : Controller
     {
         private readonly ILetterOfCreditService _lcService;
-        public LetterOfCreditController(ILetterOfCreditService lcService)
+        private readonly UserManager<ApplicationUser> _userManager;
+
+        public LetterOfCreditController(ILetterOfCreditService lcService, UserManager<ApplicationUser> userManager)
         {
             _lcService = lcService;
+            _userManager = userManager;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            var list = _lcService.GetAll();
-            return View(list);
+            var user = await _userManager.GetUserAsync(User);
+            var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+            
+            if (isAdmin)
+            {
+                var list = _lcService.GetAll();
+                return View(list);
+            }
+            else
+            {
+                var list = _lcService.GetByUserId(user.Id);
+                return View(list);
+            }
         }
 
         [Authorize(Roles = "User")]
@@ -26,20 +41,26 @@ namespace TradeSystem.Controllers
         [HttpPost]
         [Authorize(Roles = "User")]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(LetterOfCredit lc)
+        public async Task<IActionResult> Create(LetterOfCredit lc)
         {
             if (ModelState.IsValid)
             {
-                _lcService.CreateLetterOfCredit(lc);
-                return RedirectToAction(nameof(Index));
+                var user = await _userManager.GetUserAsync(User);
+                var success = _lcService.CreateLetterOfCredit(lc, user.Id);
+                if (success)
+                {
+                    return RedirectToAction(nameof(Index));
+                }
+                ModelState.AddModelError("", "Failed to create Letter of Credit. Please try again.");
             }
             return View(lc);
         }
 
         [Authorize(Roles = "User")]
-        public IActionResult Amend(int id)
+        public async Task<IActionResult> Amend(int id)
         {
-            var lc = _lcService.GetById(id);
+            var user = await _userManager.GetUserAsync(User);
+            var lc = _lcService.GetByIdAndUserId(id, user.Id);
             if (lc == null) 
                 return NotFound();
             return View(lc);
@@ -48,12 +69,17 @@ namespace TradeSystem.Controllers
         [HttpPost]
         [Authorize(Roles = "User")]
         [ValidateAntiForgeryToken]
-        public IActionResult Amend(LetterOfCredit lc)
+        public async Task<IActionResult> Amend(LetterOfCredit lc)
         {
             if (ModelState.IsValid)
             {
-                _lcService.AmendLetterOfCredit(lc);
-                return RedirectToAction(nameof(Index));
+                var user = await _userManager.GetUserAsync(User);
+                var success = _lcService.AmendLetterOfCredit(lc, user.Id);
+                if (success)
+                {
+                    return RedirectToAction(nameof(Index));
+                }
+                ModelState.AddModelError("", "Failed to amend Letter of Credit. Please try again.");
             }
             return View(lc);
         }
@@ -76,9 +102,21 @@ namespace TradeSystem.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        public IActionResult Details(int id)
+        public async Task<IActionResult> Details(int id)
         {
-            var lc = _lcService.GetById(id);
+            var user = await _userManager.GetUserAsync(User);
+            var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+            
+            LetterOfCredit? lc;
+            if (isAdmin)
+            {
+                lc = _lcService.GetById(id);
+            }
+            else
+            {
+                lc = _lcService.GetByIdAndUserId(id, user.Id);
+            }
+            
             if (lc == null) return NotFound();
             return View(lc);
         }

@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TradeSystem.Models
@@ -35,6 +35,12 @@ namespace TradeSystem.Models
         [Required]
         public LCStatus Status { get; set; } = LCStatus.Open;
 
+        // User tracking fields
+        [Required]
+        public string CreatedByUserId { get; set; }
+        
+        [Required]
+        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
 
         // Navigation properties
         public ICollection<BankGuarantee> BankGuarantees { get; set; }

@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using TradeSystem.Models;
 
@@ -39,7 +39,12 @@ namespace TradeSystem.Models
         [Required]
         public BgStatus Status { get; set; } = BgStatus.Pending;
 
-
+        // User tracking fields
+        [Required]
+        public string CreatedByUserId { get; set; }
+        
+        [Required]
+        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
 
         // Navigation properties
         public ICollection<TradeDocument> TradeDocuments { get; set; }

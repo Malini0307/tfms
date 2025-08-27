@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using TradeSystem.Data;
 using TradeSystem.Interfaces;
 using TradeSystem.Models;
@@ -23,7 +23,7 @@ namespace TradeSystem.Services
             return "ABC" + Guid.NewGuid().ToString("N").Substring(0, 6).ToUpperInvariant();
         }
 
-        public bool UploadDocument(TradeDocument doc)
+        public bool UploadDocument(TradeDocument doc, string userId)
         {
             // Ensure unique ReferenceNumber (generate if missing or duplicate)
             if (string.IsNullOrWhiteSpace(doc.ReferenceNumber) || _context.TradeDocuments.Any(d => d.ReferenceNumber == doc.ReferenceNumber))
@@ -33,6 +33,8 @@ namespace TradeSystem.Services
 
             // Always set server timestamps and defaults
             doc.UploadDate = DateTime.Now;
+            doc.CreatedByUserId = userId;
+            doc.CreatedDate = DateTime.UtcNow;
             if (doc.Status == 0) doc.Status = TdStatus.Active;
 
             _context.TradeDocuments.Add(doc);
@@ -68,6 +70,14 @@ namespace TradeSystem.Services
                 .FirstOrDefault(t => t.DocumentId == id);
         }
 
+        public TradeDocument? ViewDocumentByUserId(int id, string userId)
+        {
+            return _context.TradeDocuments
+                .Include(t => t.LetterOfCredit)
+                .Include(t => t.BankGuarantee)
+                .FirstOrDefault(t => t.DocumentId == id && t.CreatedByUserId == userId);
+        }
+
         public IEnumerable<TradeDocument> GetAllDocumentsById()
         {
             return _context.TradeDocuments
@@ -77,9 +87,20 @@ namespace TradeSystem.Services
                 .ToList();
         }
 
-        public bool UpdateDocumentDetails(TradeDocument updatedDoc)
+        public IEnumerable<TradeDocument> GetDocumentsByUserId(string userId)
         {
-            var existing = _context.TradeDocuments.Find(updatedDoc.DocumentId);
+            return _context.TradeDocuments
+                .Include(t => t.LetterOfCredit)
+                .Include(t => t.BankGuarantee)
+                .Where(t => t.CreatedByUserId == userId)
+                .OrderByDescending(t => t.UploadDate)
+                .ToList();
+        }
+
+        public bool UpdateDocumentDetails(TradeDocument updatedDoc, string userId)
+        {
+            var existing = _context.TradeDocuments
+                .FirstOrDefault(t => t.DocumentId == updatedDoc.DocumentId && t.CreatedByUserId == userId);
             if (existing == null) return false;
 
             existing.DocumentType = updatedDoc.DocumentType;
