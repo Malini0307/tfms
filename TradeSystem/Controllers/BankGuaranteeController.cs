@@ -63,11 +63,11 @@ namespace TradeSystem.Controllers
 
             if (!ModelState.IsValid)
             {
-                return Create(); // reload LCs & view
+                return await Create(); // reload LCs & view
             }
 
             var lc = _context.LetterOfCredits.FirstOrDefault(l => l.LcId == lcId);
-            if (lc == null) return Create();
+            if (lc == null) return await Create();
 
             if (!User.IsInRole("Admin"))
             {
@@ -79,7 +79,7 @@ namespace TradeSystem.Controllers
             if (!ok)
             {
                 ModelState.AddModelError("", "Unable to create Bank Guarantee from the selected LC.");
-                return Create();
+                return await Create();
             }
             return RedirectToAction(nameof(Index));
         }
