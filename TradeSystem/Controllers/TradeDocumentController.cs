@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -64,9 +64,11 @@ namespace TradeSystem.Controllers
         }
 
         // List
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            var docs = _service.GetAllDocumentsById();
+            var currentUser = await _userManager.GetUserAsync(User);
+            bool isAdmin = User.IsInRole("Admin");
+            var docs = _service.GetAllDocuments(currentUser?.Id, isAdmin);
             return View(docs);
         }
 
@@ -89,6 +91,8 @@ namespace TradeSystem.Controllers
         public async Task<IActionResult> Upload([Bind("DocumentType,Status,LcId,GuaranteeId,ReferenceNumber")] TradeDocument doc)
         {
             doc.UploadedBy = await GetCurrentDisplayNameAsync();
+            var currentUser = await _userManager.GetUserAsync(User);
+            doc.UserId = currentUser?.Id;
 
             ModelState.Remove(nameof(TradeDocument.ReferenceNumber));
             ModelState.Remove(nameof(TradeDocument.UploadedBy));
@@ -121,10 +125,20 @@ namespace TradeSystem.Controllers
 
         // Details
         [HttpGet]
-        public IActionResult Details(int id)
+        public async Task<IActionResult> Details(int id)
         {
             var doc = _service.ViewDocument(id);
             if (doc == null) return NotFound();
+            if (!User.IsInRole("Admin"))
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (doc.UserId != currentUser?.Id
+                    && !(doc.LcId != null && _db.LetterOfCredits.Any(l => l.LcId == doc.LcId && l.UserId == currentUser!.Id))
+                    && !(doc.GuaranteeId != null && _db.BankGuarantees.Any(b => b.GuaranteeId == doc.GuaranteeId && b.UserId == currentUser!.Id)))
+                {
+                    return Forbid();
+                }
+            }
             LoadLookups();
             return View(doc);
         }
@@ -132,10 +146,20 @@ namespace TradeSystem.Controllers
         // Edit (User only)
         [Authorize(Roles = "User")]
         [HttpGet]
-        public IActionResult Edit(int id)
+        public async Task<IActionResult> Edit(int id)
         {
             var doc = _service.ViewDocument(id);
             if (doc == null) return NotFound();
+            if (!User.IsInRole("Admin"))
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (doc.UserId != currentUser?.Id
+                    && !(doc.LcId != null && _db.LetterOfCredits.Any(l => l.LcId == doc.LcId && l.UserId == currentUser!.Id))
+                    && !(doc.GuaranteeId != null && _db.BankGuarantees.Any(b => b.GuaranteeId == doc.GuaranteeId && b.UserId == currentUser!.Id)))
+                {
+                    return Forbid();
+                }
+            }
             LoadLookups();
             return View(doc);
         }

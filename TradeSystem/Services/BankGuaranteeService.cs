@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 using TradeSystem.Interfaces;
 
@@ -64,7 +64,8 @@ namespace TradeSystem.Services
                 GuaranteeAmount = customAmount ?? lc.Amount,
                 Currency = lc.Currency,
                 ValidityPeriod = validityPeriod,
-                Status = BgStatus.Pending
+                Status = BgStatus.Pending,
+                UserId = lc.UserId
             };
 
             try

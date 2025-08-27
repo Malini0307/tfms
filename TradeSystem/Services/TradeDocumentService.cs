@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using TradeSystem.Data;
 using TradeSystem.Interfaces;
 using TradeSystem.Models;
@@ -68,13 +68,22 @@ namespace TradeSystem.Services
                 .FirstOrDefault(t => t.DocumentId == id);
         }
 
-        public IEnumerable<TradeDocument> GetAllDocumentsById()
+        public IEnumerable<TradeDocument> GetAllDocuments(string? userId, bool isAdmin)
         {
-            return _context.TradeDocuments
+            var query = _context.TradeDocuments
                 .Include(t => t.LetterOfCredit)
                 .Include(t => t.BankGuarantee)
-                .OrderByDescending(t => t.UploadDate)
-                .ToList();
+                .AsQueryable();
+
+            if (!isAdmin && !string.IsNullOrWhiteSpace(userId))
+            {
+                query = query.Where(t => t.UserId == userId
+                    || (t.LcId != null && _context.LetterOfCredits.Any(l => l.LcId == t.LcId && l.UserId == userId))
+                    || (t.GuaranteeId != null && _context.BankGuarantees.Any(b => b.GuaranteeId == t.GuaranteeId && b.UserId == userId))
+                );
+            }
+
+            return query.OrderByDescending(t => t.UploadDate).ToList();
         }
 
         public bool UpdateDocumentDetails(TradeDocument updatedDoc)

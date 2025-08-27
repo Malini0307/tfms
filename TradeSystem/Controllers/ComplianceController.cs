@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using TradeSystem.Interfaces;
@@ -11,26 +11,45 @@ namespace TradeSystem.Controllers
         private readonly IComplianceService _service;
         private readonly ILetterOfCreditService _lcService;
         private readonly IWebHostEnvironment _env;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly TFMSDbContext _db;
 
-        public ComplianceController(IComplianceService service, ILetterOfCreditService lcService, IWebHostEnvironment env)
+        public ComplianceController(IComplianceService service, ILetterOfCreditService lcService, IWebHostEnvironment env, UserManager<ApplicationUser> userManager, TFMSDbContext db)
         {
             _service = service;
             _lcService = lcService;
             _env = env;
+            _userManager = userManager;
+            _db = db;
         }
 
         // List reports (Admin & User)
         [Authorize(Roles = "Admin,User")]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View(_service.GetAllCompliances());
+            if (User.IsInRole("Admin"))
+                return View(_service.GetAllCompliances());
+
+            var currentUser = await _userManager.GetUserAsync(User);
+            var list = _service.GetAllCompliances()
+                .Where(c => (c.LcId != null && _db.LetterOfCredits.Any(l => l.LcId == c.LcId && l.UserId == currentUser!.Id))
+                         || (c.GuaranteeId != null && _db.BankGuarantees.Any(b => b.GuaranteeId == c.GuaranteeId && b.UserId == currentUser!.Id))
+                ).ToList();
+            return View(list);
         }
 
         [Authorize(Roles = "Admin")]
         [HttpGet]
-        public IActionResult Run()
+        public async Task<IActionResult> Run()
         {
             var availableLcIds = _service.GetAvailableLcIds();
+            if (!User.IsInRole("Admin"))
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                availableLcIds = availableLcIds
+                    .Where(id => _db.LetterOfCredits.Any(l => l.LcId == id && l.UserId == currentUser!.Id))
+                    .ToList();
+            }
 
             if (!availableLcIds.Any())
             {
@@ -74,10 +93,17 @@ namespace TradeSystem.Controllers
 
 
         [Authorize(Roles = "Admin,User")]
-        public IActionResult Details(int id)
+        public async Task<IActionResult> Details(int id)
         {
             var comp = _service.GetComplianceById(id);
             if (comp == null) return NotFound();
+            if (!User.IsInRole("Admin"))
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                var ownsLc = comp.LcId != null && _db.LetterOfCredits.Any(l => l.LcId == comp.LcId && l.UserId == currentUser!.Id);
+                var ownsBg = comp.GuaranteeId != null && _db.BankGuarantees.Any(b => b.GuaranteeId == comp.GuaranteeId && b.UserId == currentUser!.Id);
+                if (!ownsLc && !ownsBg) return Forbid();
+            }
             return View(comp);
         }
 
